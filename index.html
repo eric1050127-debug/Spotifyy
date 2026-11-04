@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Spotify｜個人音樂播放器</title>
+<style>
+:root{--green:#1ed760;--bg:#090b0a;--panel:#151917;--panel2:#202723;--muted:#a7b0aa;--white:#f5f7f5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--white);font-family:Inter,"Noto Sans TC",Arial,sans-serif;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;border:0}
+.app{display:grid;grid-template-columns:245px 1fr;grid-template-rows:1fr 92px;min-height:100vh;gap:8px;padding:8px}
+.sidebar,.main{background:var(--panel);border-radius:12px}.sidebar{padding:24px 16px;grid-row:1}
+.brand{font-size:22px;font-weight:800;letter-spacing:-.7px;margin:0 0 32px;display:flex;align-items:center;gap:10px}.brand-mark{width:30px;height:30px;background:var(--green);border-radius:50%;display:grid;place-items:center;color:#071109;font-weight:900}
+.nav button,.side-link{display:flex;align-items:center;gap:14px;width:100%;padding:12px 10px;color:var(--muted);background:transparent;text-align:left;border-radius:8px;font-weight:650}.nav button.active,.nav button:hover,.side-link:hover{color:white;background:#252d28}.nav-icon{font-size:19px;width:22px;text-align:center}.side-label{margin:28px 10px 12px;color:#89938c;text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1.4px}
+.playlists{display:grid;gap:3px}.side-link{font-size:14px;font-weight:500;padding:9px 10px}
+.main{padding:24px 30px 34px;overflow:auto;background:linear-gradient(180deg,#203b2b 0,#17251d 220px,var(--panel) 440px)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px}.round-btn{width:34px;height:34px;border-radius:50%;background:#09110c;color:white;font-size:20px;margin-right:7px}.profile{background:#090e0b;border-radius:30px;padding:7px 13px;font-size:13px;font-weight:700}
+h1{font-size:32px;margin:30px 0 20px;letter-spacing:-1px}.greeting{font-size:14px;color:#c9d5cc}
+.quick-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.quick{display:flex;align-items:center;gap:13px;background:#ffffff17;border-radius:7px;overflow:hidden;font-weight:700;min-height:66px;transition:.2s}.quick:hover{background:#ffffff2b;transform:translateY(-2px)}.quick img{width:66px;height:66px;object-fit:cover}.quick span{padding-right:8px}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:34px 0 15px}.section-head h2{font-size:21px;margin:0}.section-head a{font-size:12px;color:var(--muted);text-decoration:none;font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}.card{padding:13px;background:#ffffff09;border-radius:9px;cursor:pointer;transition:.2s;min-width:0}.card:hover{background:#ffffff17}.cover{width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;display:block;box-shadow:0 8px 18px #0005}.card h3{font-size:14px;margin:12px 0 5px}.card p{font-size:12px;color:var(--muted);margin:0;line-height:1.5}
+.searchbar{display:flex;align-items:center;gap:10px;background:white;border-radius:30px;padding:0 15px;max-width:430px;margin:24px 0 12px;color:#111}.searchbar input{border:0;outline:0;padding:12px 0;width:100%;color:#111;background:transparent}.search-results{display:grid;gap:7px;max-width:700px}.track-row{display:flex;align-items:center;gap:13px;padding:9px;border-radius:7px}.track-row:hover{background:#ffffff12}.track-row img{width:48px;height:48px;border-radius:5px;object-fit:cover}.track-meta{flex:1;min-width:0}.track-meta strong{display:block;font-size:14px}.track-meta small{color:var(--muted)}.track-row button{background:transparent;color:var(--muted);font-size:19px;padding:7px}.track-row button:hover{color:var(--green)}
+.player{grid-column:1/-1;background:#111614;border:1px solid #26312a;border-radius:12px;display:grid;grid-template-columns:1fr 1.3fr 1fr;align-items:center;padding:12px 20px;gap:15px}.now{display:flex;align-items:center;gap:12px;min-width:0}.now img{width:56px;height:56px;border-radius:6px;object-fit:cover}.now strong{display:block;font-size:13px}.now small{color:var(--muted);font-size:11px}.heart{background:transparent;color:var(--muted);font-size:20px}.controls{display:grid;justify-items:center;gap:7px}.control-buttons{display:flex;align-items:center;gap:22px}.control-buttons button{background:transparent;color:#d6ded8;font-size:17px}.control-buttons .play{background:var(--white);color:#111;border-radius:50%;width:34px;height:34px;font-size:16px;font-weight:900}.control-buttons button:hover{color:var(--green)}.progress{display:flex;align-items:center;gap:9px;width:100%;font-size:10px;color:var(--muted)}input[type=range]{accent-color:var(--green);cursor:pointer}.progress input{flex:1;height:4px}.volume{display:flex;justify-content:flex-end;align-items:center;gap:10px;color:var(--muted)}.volume input{width:95px}
+.notice{color:var(--muted);font-size:12px;margin-top:20px;line-height:1.7}.hidden{display:none!important}
+@media(max-width:850px){.app{grid-template-columns:190px 1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.player{grid-template-columns:1fr 1.2fr}.volume{display:none}}
+@media(max-width:600px){.app{display:flex;flex-direction:column;padding:0;gap:0}.sidebar{border-radius:0;padding:12px 16px}.brand{margin:0 0 8px}.nav{display:flex}.nav button{justify-content:center;padding:9px}.nav button span:last-child{display:none}.side-label,.playlists{display:none}.main{border-radius:0;padding:20px 16px;min-height:62vh}.quick-grid{grid-template-columns:1fr 1fr}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.player{position:sticky;bottom:0;border-radius:0;grid-template-columns:1fr 1fr;padding:10px}.now img{width:43px;height:43px}.now .heart{display:none}.controls{gap:3px}.control-buttons{gap:14px}.progress{gap:5px}.volume{display:none}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><span class="brand-mark">≋</span> My Spotify</div>
+  <nav class="nav">
+    <button class="active" data-view="home"><span class="nav-icon">⌂</span><span>首頁</span></button>
+    <button data-view="search"><span class="nav-icon">⌕</span><span>搜尋</span></button>
+    <button data-view="library"><span class="nav-icon">▤</span><span>你的收藏</span></button>
+  </nav>
+  <div class="side-label">你的音樂空間</div>
+  <div class="playlists">
+    <button class="side-link" data-playlist="focus">＋　讀書專注歌單</button>
+    <button class="side-link" data-playlist="chill">♫　放鬆時光</button>
+    <button class="side-link" data-playlist="energy">⚡　活力充電站</button>
+  </div>
+</aside>
+<main class="main">
+  <div class="topbar"><div><button class="round-btn" aria-label="上一頁">‹</button><button class="round-btn" aria-label="下一頁">›</button></div><div class="profile">●　訪客模式</div></div>
+  <section id="homeView">
+    <p class="greeting">早安，今天想聽點什麼？</p><h1>為你準備的音樂</h1>
+    <div class="quick-grid" id="quickGrid"></div>
+    <div class="section-head"><h2>探索音樂</h2><a href="#" data-goto="search">查看全部</a></div>
+    <div class="cards" id="discoverCards"></div>
+    <p class="notice">這是一個 Spotify 風格的互動示範作品。播放控制會以瀏覽器合成音效示範，不會串接 Spotify 帳號或播放商業歌曲。</p>
+  </section>
+  <section id="searchView" class="hidden">
+    <h1>搜尋音樂</h1><label class="searchbar"><span>⌕</span><input id="searchInput" placeholder="搜尋歌曲、歌手或歌單..." autocomplete="off"></label>
+    <div id="searchResults" class="search-results"></div>
+  </section>
+  <section id="libraryView" class="hidden">
+    <h1>你的收藏</h1><p class="greeting">按下歌曲旁邊的 ♡，就能把喜歡的音樂收藏在這裡。</p>
+    <div id="favoriteList" class="search-results"></div>
+  </section>
+</main>
+<footer class="player">
+  <div class="now"><img id="nowCover" alt="歌曲封面"><div><strong id="nowTitle">選一首歌開始體驗</strong><small id="nowArtist">My Spotify Demo</small></div><button class="heart" id="nowHeart" title="收藏">♡</button></div>
+  <div class="controls"><div class="control-buttons"><button id="shuffle" title="隨機播放">⤨</button><button id="prev" title="上一首">◀</button><button class="play" id="play" title="播放">▶</button><button id="next" title="下一首">▶</button><button id="repeat" title="循環播放">↻</button></div><div class="progress"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="duration">2:30</span></div></div>
+  <div class="volume"><span>🔊</span><input id="volume" type="range" min="0" max="100" value="65"></div>
+</footer>
+</div>
+<script>
+const songs=[
+ {id:1,title:"晨光漫步",artist:"Demo Sounds",mood:"放鬆時光",color:["#f6b76c","#7b4b91"],genre:"Chill",length:150},
+ {id:2,title:"專注時刻",artist:"Focus Lab",mood:"讀書專注歌單",color:["#3c8d83","#142e45"],genre:"Focus",length:180},
+ {id:3,title:"城市節拍",artist:"Night Drive",mood:"活力充電站",color:["#e05a4f","#49245f"],genre:"Pop",length:165},
+ {id:4,title:"午後微風",artist:"Demo Sounds",mood:"放鬆時光",color:["#f2d18b","#559b8d"],genre:"Acoustic",length:140},
+ {id:5,title:"向前衝",artist:"Move More",mood:"活力充電站",color:["#ed8b35","#a92e4c"],genre:"Energy",length:175},
+ {id:6,title:"深夜閱讀",artist:"Focus Lab",mood:"讀書專注歌單",color:["#5465a7","#171d3b"],genre:"Ambient",length:190},
+ {id:7,title:"海邊日記",artist:"Demo Sounds",mood:"放鬆時光",color:["#52b9c6","#24517b"],genre:"Chill",length:155},
+ {id:8,title:"閃耀日常",artist:"Move More",mood:"活力充電站",color:["#edc34c","#d64c55"],genre:"Pop",length:160}
+];
+const svgCover=(s)=>{const [a,b]=s.color;const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="400" height="400" fill="url(#g)"/><circle cx="310" cy="90" r="105" fill="#fff" opacity=".12"/><circle cx="70" cy="340" r="145" fill="#000" opacity=".12"/><path d="M75 245 Q200 80 325 245" fill="none" stroke="#fff" stroke-width="9" opacity=".5"/><text x="200" y="205" fill="white" font-size="34" font-family="Arial" text-anchor="middle" font-weight="bold">${s.genre.toUpperCase()}</text><text x="200" y="285" fill="white" font-size="20" font-family="Arial" text-anchor="middle" opacity=".9">MY MUSIC</text></svg>`;return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg)};
+songs.forEach(s=>s.cover=svgCover(s));
+let current=0,playing=false,position=0,favorites=new Set(),shuffle=false,repeat=false,audioCtx=null,masterGain=null,oscillators=[],tick=null;
+const $=id=>document.getElementById(id);
+function trackRow(s){return `<div class="track-row"><img src="${s.cover}"><div class="track-meta"><strong>${s.title}</strong><small>${s.artist} ・ ${s.genre}</small></div><button onclick="playSong(${s.id})" title="播放">▶</button><button onclick="toggleFav(${s.id})" title="收藏">${favorites.has(s.id)?"♥":"♡"}</button></div>`}
+function renderHome(){
+ $("quickGrid").innerHTML=songs.slice(0,3).map(s=>`<div class="quick" onclick="playSong(${s.id})"><img src="${s.cover}"><span>${s.mood}</span></div>`).join("");
+ $("discoverCards").innerHTML=songs.slice(3).map(s=>`<div class="card" onclick="playSong(${s.id})"><img class="cover" src="${s.cover}"><h3>${s.title}</h3><p>${s.artist}・${s.mood}</p></div>`).join("");
+}
+function showView(view){["home","search","library"].forEach(v=>$(v+"View").classList.toggle("hidden",v!==view));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));if(view==="library")renderFavorites()}
+function renderSearch(q=""){let list=songs.filter(s=>(s.title+s.artist+s.genre+s.mood).toLowerCase().includes(q.toLowerCase()));$("searchResults").innerHTML=list.length?list.map(trackRow).join(""):"<p class='notice'>找不到符合的歌曲，試試「晨光」或「Focus」。</p>"}
+function renderFavorites(){$("favoriteList").innerHTML=[...favorites].map(id=>songs.find(s=>s.id===id)).filter(Boolean).map(trackRow).join("")||"<p class='notice'>目前還沒有收藏歌曲。</p>"}
+function toggleFav(id){favorites.has(id)?favorites.delete(id):favorites.add(id);updatePlayer();renderFavorites();renderSearch($("searchInput").value)}
+function updatePlayer(){let s=songs[current];$("nowCover").src=s.cover;$("nowTitle").textContent=s.title;$("nowArtist").textContent=s.artist;$("nowHeart").textContent=favorites.has(s.id)?"♥":"♡";$("play").textContent=playing?"Ⅱ":"▶";$("duration").textContent=fmt(s.length)}
+function fmt(n){return Math.floor(n/60)+":"+String(Math.floor(n%60)).padStart(2,"0")}
+function stopTone(){oscillators.forEach(o=>{try{o.stop()}catch(e){}});oscillators=[]}
+function startTone(){if(!audioCtx){audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=Number($("volume").value)/100;masterGain.connect(audioCtx.destination)}audioCtx.resume();stopTone();let base=160+current*24;[1,1.25,1.5].forEach((ratio,i)=>{let o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=i===1?"sine":"triangle";o.frequency.value=base*ratio;g.gain.value=.018/(i+1);o.connect(g);g.connect(masterGain);o.start();oscillators.push(o)})}
+function playSong(id){let idx=songs.findIndex(s=>s.id===id);if(idx>=0){current=idx;position=0}playing=true;startTone();updatePlayer();startTimer()}
+function togglePlay(){if(playing){playing=false;stopTone();clearInterval(tick)}else{playing=true;startTone();startTimer()}updatePlayer()}
+function startTimer(){clearInterval(tick);tick=setInterval(()=>{if(!playing)return;position++;$("seek").value=position/songs[current].length*100;$("elapsed").textContent=fmt(position);if(position>=songs[current].length){if(repeat){position=0}else{nextSong()}}},1000)}
+function nextSong(){let idx=shuffle?Math.floor(Math.random()*songs.length):(current+1)%songs.length;playSong(songs[idx].id)}
+function prevSong(){if(position>3){position=0;$("seek").value=0;$("elapsed").textContent="0:00"}else playSong(songs[(current-1+songs.length)%songs.length].id)}
+$("play").onclick=togglePlay;$("next").onclick=nextSong;$("prev").onclick=prevSong;$("nowHeart").onclick=()=>toggleFav(songs[current].id);
+$("shuffle").onclick=()=>{shuffle=!shuffle;$("shuffle").style.color=shuffle?"var(--green)":""};$("repeat").onclick=()=>{repeat=!repeat;$("repeat").style.color=repeat?"var(--green)":""};
+$("seek").oninput=e=>{position=Number(e.target.value)/100*songs[current].length;$("elapsed").textContent=fmt(position)};
+$("volume").oninput=e=>{if(masterGain)masterGain.gain.value=Number(e.target.value)/100};
+$("searchInput").oninput=e=>renderSearch(e.target.value);
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
+document.querySelectorAll("[data-goto]").forEach(a=>a.onclick=e=>{e.preventDefault();showView(a.dataset.goto)});
+document.querySelectorAll("[data-playlist]").forEach(b=>b.onclick=()=>{let mood={focus:"讀書專注歌單",chill:"放鬆時光",energy:"活力充電站"}[b.dataset.playlist];let s=songs.find(x=>x.mood===mood);if(s)playSong(s.id)});
+renderHome();renderSearch();updatePlayer();
+</script>
+</body></html>
